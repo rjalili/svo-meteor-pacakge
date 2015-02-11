@@ -7,12 +7,21 @@ Package.describe({
   git: 'https://github.com/rjalili/svo-meteor-package.git',
   // By default, Meteor will default to using README.md for documentation.
   // To avoid submitting documentation, set this field to null.
-  documentation: 'README.md'
+  documentation: null //'README.md'
 });
 
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3.1');
-  api.addFiles('appmill:svo.js');
+  api.use('underscore');
+  api.use('iron:router');
+  // Give users of this package access to the Templating package.
+  api.imply('templating')
+  // Export the object 'Email' to packages or apps that use this package.
+  //api.export('SVOAPI', 'server');
+  // Specify the source code for the package.
+
+  api.addFiles('appmill:svo-server.js',"server");
+  api.addFiles('appmill:svo-both.js');
 });
 
 Package.onTest(function(api) {
@@ -20,3 +29,8 @@ Package.onTest(function(api) {
   api.use('appmill:svo');
   api.addFiles('appmill:svo-tests.js');
 });
+/*
+Npm.depends({"iron:router":"1.0.7",
+             "meteor-platform":"1.2.1",
+             "underscore":"1.0.2"});
+*/

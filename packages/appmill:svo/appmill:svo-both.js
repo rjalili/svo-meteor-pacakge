@@ -1,5 +1,5 @@
 // Write your package code here!
-Events = new Mongo.Collection("events");
+Events = new Meteor.Collection("events");
 
 Router.route("/", function () {
     name: "home"
@@ -93,24 +93,3 @@ Router.route("/svo/:subject/:verb/:object",
     this.response.writeHead(200, {'Content-Type': 'application/json'});
     this.response.end(JSON.stringify(result));
   })
-
-if ( Meteor.isServer ) {
-  Meteor.startup(function () {
-
-  if (Events.find().count() === 0) {
-    var data = [
-      {subject:"mike",verb:"told",object:"joe"},   
-      {subject:"joe",verb:"told",object:"sam"},   
-      {subject:"mike",verb:"told",object:"sam"},   
-      {subject:"sam",verb:"told",object:"fred"}   
-    ];
-
-    var timestamp = (new Date()).getTime();
-    _.each(data, function(item) {
-      Events.insert(_.extend(item,{when:timestamp}));  
-      timestamp += 1; // ensure unique timestamp.
-    });
-  }
-});
-
-}
