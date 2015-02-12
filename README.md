@@ -1,3 +1,3 @@
 # svo-meteor-package
 
-See readme in the private/ directory
+See readme in the packages/ directory
