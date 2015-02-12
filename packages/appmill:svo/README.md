@@ -17,3 +17,5 @@ GET /svo/[subject]/[verb]/[object]
 simply use "-" instead of a subject, verb, or object, and the result will be all the matching events.
 
 Result is a JSON object
+
+ 
