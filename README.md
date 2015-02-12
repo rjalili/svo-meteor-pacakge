@@ -1,4 +1,5 @@
-#Subject-Verb-Object Datastore and Query API
+#Subject-Verb-Object 
+##Datastore and Query API
 
 Make sure you have these packages added to your app:
  underscore 
