@@ -83,7 +83,10 @@ Router.route("/svo/:subject/:verb/:object",
     }
     var result = selector;
 //    result = this.request.bod;
-    result = {"_id": Events.insert(selector)};
+    if ( isValidSVO(selector) ) {
+      
+      result = {"_id": Events.insert(selector)};
+    }
     this.response.writeHead(200, {'Content-Type': 'application/json'});
     this.response.end(JSON.stringify(result));
   })
@@ -93,3 +96,9 @@ Router.route("/svo/:subject/:verb/:object",
     this.response.writeHead(200, {'Content-Type': 'application/json'});
     this.response.end(JSON.stringify(result));
   })
+
+function isValidSVO(svo) {
+  // a valid svo has at least a subject and a verb, the object can be anything, including blank/non-existent
+  return ( svo.subject && svo.verb && (svo.subject != "-") && (svo.verb != "-") )
+          //&& (!svo.object || (svo.object && svo.object != "-") ) );
+}
