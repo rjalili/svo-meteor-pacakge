@@ -1,6 +1,59 @@
 // Write your package code here!
 Events = new Meteor.Collection("events");
 
+SVOLog = {
+  ValidationPattern : {subject:String, verb:String, object:Match.Optional(String)},
+    /*
+  // a valid svo has at least a subject and a verb, the object can be anything, including blank/non-existent
+  return ( svo.subject && svo.verb && (svo.subject != "-") && (svo.verb != "-") )
+          //&& (!svo.object || (svo.object && svo.object != "-") ) );
+          */
+
+  isValidSVO : function(svo) { return Match.test(svo,this.ValidationPattern); } ,
+
+  add : function(svo) {
+    
+    var selector = {};
+    
+    check(svo,this.ValidationPattern);
+
+    if ( svo.subject != "-") {
+      _.extend(selector, {"subject":svo.subject});
+    }
+    if ( svo.object != "-") {
+      _.extend(selector, {"object":svo.object});
+    }
+    if ( svo.verb != "-") {
+      _.extend(selector, {"verb":svo.verb});          
+    }
+
+    /*
+      if ( this.request.body ) {
+        _.extend(selector, {"params": this.request.body});
+      }
+      */
+    var result = selector;
+    result = {"_id": Events.insert(selector)};
+    return result;
+  },
+  query : function(svo) {
+    check(svo,this.ValidationPattern);
+
+    var selector ={};
+
+    if ( p != "-") {
+      _.extend(selector, {"subject":svo.subject});
+    }
+    if ( svo.object != "-") {
+      _.extend(selector, {"object":svo.object});
+    }
+    if ( svo.verb != "-") {
+      _.extend(selector, {"verb":svo.verb});          
+    }
+    return {result: Events.find(selector, {$orderby:{"when":1}}).fetch()};
+  } 
+}
+
 Router.route("/", function () {
     name: "home"
   });
@@ -12,93 +65,38 @@ Router.route("/svo/:subject/:verb/:object",
     // who did what to given object
     // e.g. /0/gave/mike  results in all who gave to mike
     
-    var q = {subject:this.params.subject,
-                  verb: this.params.verb,
-                  object:this.params.object}; //this.params;
-    var selector ={};
     var result = {};
-    
-    /*
-    var validParams = ["subject","verb","object"];
-    var lookup = _.intersection(validParams,_.keys(this.params));
-    _.each(validParams, function(v,k,params) {
-      var p = params[v]; // this route only triggers by iron:router if all 3 params here
-      if (p != "-" ) { selector[v]= "hi"; }     
-    }, this.params);
-    
-    //result = lookup;
-    */
-    if ( this.params.subject ) {
-      var p = this.params.subject;
-      if ( p != "-") {
-      _.extend(selector, {"subject":p});
-      }
+
+    try {
+      result = SVOLog.query(this.params);
+      //result = selector;
+      this.response.writeHead(200, {'Content-Type': 'application/json'});
+      this.response.end(JSON.stringify(result));
+    } 
+    catch (e) {
+      this.response.writeHead(400, {'Content-Type': 'application/json'});
+      this.response.end(JSON.stringify(e));      
     }
-    
-    if ( this.params.object ) {
-      var p = this.params.object;
-      if ( p != "-") {
-      _.extend(selector, {"object":this.params.object});
-      }
-    }
-    if ( this.params.verb  ) {
-      var p = this.params.verb;
-      if ( p != "-") {
-        _.extend(selector, {"verb":p});          
-      }
-    }
-    result = {result: Events.find(selector, {$orderby:{"when":1}}).fetch()};
-    //result = selector;
-    this.response.writeHead(200, {'Content-Type': 'application/json'});
-    this.response.end(JSON.stringify(result));
   })
+
 //
 // POST Handler
 //
   .post(function () {
     // POST /webhooks/stripe
-    var result, selector = {};
-    if ( this.params.subject ) {
-      var p = this.params.subject;
-      if ( p != "-") {
-      _.extend(selector, {"subject":p});
-      }
+    var result = {};
+    try {
+      result = SVOLog.add(this.params);
+      this.response.writeHead(200, {'Content-Type': 'application/json'});
+      this.response.end(JSON.stringify(result));
     }
-    
-    if ( this.params.object ) {
-      var p = this.params.object;
-      if ( p != "-") {
-      _.extend(selector, {"object":this.params.object});
-      }
-    }
-    if ( this.params.verb  ) {
-      var p = this.params.verb;
-      if ( p != "-") {
-        _.extend(selector, {"verb":p});          
-      }
-    }
-    
-    if ( this.request.body ) {
-      _.extend(selector, {"params": this.request.body});
-    }
-    var result = selector;
-//    result = this.request.bod;
-    if ( isValidSVO(selector) ) {
+    catch (e) {
+      this.response.writeHead(400, {'Content-Type': 'application/json'});
+      this.response.end(e);
       
-      result = {"_id": Events.insert(selector)};
     }
-    this.response.writeHead(200, {'Content-Type': 'application/json'});
-    this.response.end(JSON.stringify(result));
   })
   .put(function () {
-    // PUT /webhooks/stripe
-    var result = this.request;
-    this.response.writeHead(200, {'Content-Type': 'application/json'});
-    this.response.end(JSON.stringify(result));
+    this.post();
   })
 
-function isValidSVO(svo) {
-  // a valid svo has at least a subject and a verb, the object can be anything, including blank/non-existent
-  return ( svo.subject && svo.verb && (svo.subject != "-") && (svo.verb != "-") )
-          //&& (!svo.object || (svo.object && svo.object != "-") ) );
-}

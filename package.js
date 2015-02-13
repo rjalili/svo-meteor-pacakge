@@ -13,7 +13,7 @@ Package.describe({
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3.1');
   api.use('underscore');
-  api.use('iron:router');
+  api.use('iron:router@1.0.7');
   // Give users of this package access to the Templating package.
   api.imply('templating')
   // Export the object 'Email' to packages or apps that use this package.

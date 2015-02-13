@@ -1,9 +1,3 @@
-/*
-Npm.require("iron:router");
-Npm.require("meteor-platform");
-Npm.require("underscore");
-*/
-
 Meteor.startup(function () {
 
   if (Events.find().count() === 0) {
@@ -21,3 +15,14 @@ Meteor.startup(function () {
     });
   }
 });
+
+Meteor.methods({
+  addSVO: function(svo) {
+    check(svo,Object);
+    return SVOLog.put(svo)
+  },
+  querySVO: function(svo) {
+    check(svo,Object);
+    return SVOLog.query(svo)    
+  }
+})
