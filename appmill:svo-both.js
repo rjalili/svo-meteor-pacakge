@@ -1,5 +1,5 @@
 // Write your package code here!
-Events = new Meteor.Collection("events");
+Events = new Mongo.Collection("events");
 
 SVOLog = {
   ValidationPattern : {subject:String, verb:String, object:Match.Optional(String)},
@@ -52,7 +52,8 @@ SVOLog = {
     }
     return {result: Events.find(selector, {$orderby:{"when":1}}).fetch()};
   } 
-}
+};
+
 
 Router.route("/", function () {
     name: "home"
