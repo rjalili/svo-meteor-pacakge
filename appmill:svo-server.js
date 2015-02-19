@@ -16,10 +16,15 @@ Meteor.startup(function () {
   }
 });
 
+Events.before.insert(function(userId, doc){
+  //add or overwrite the createdAt property for each insert
+  doc.createdAt = Date.now();
+});
+
 Meteor.methods({
   addSVO: function(svo) {
     check(svo,Object);
-    return SVOLog.put(svo)
+    return SVOLog.add(svo)
   },
   querySVO: function(svo) {
     check(svo,Object);

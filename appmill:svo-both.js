@@ -2,7 +2,7 @@
 Events = new Mongo.Collection("events");
 
 SVOLog = {
-  ValidationPattern : {subject:String, verb:String, object:Match.Optional(String)},
+  ValidationPattern : Match.ObjectIncluding({subject:String, verb:String, object:Match.Optional(String)}),
     /*
   // a valid svo has at least a subject and a verb, the object can be anything, including blank/non-existent
   return ( svo.subject && svo.verb && (svo.subject != "-") && (svo.verb != "-") )
@@ -14,7 +14,7 @@ SVOLog = {
   add : function(svo) {
     
     var selector = {};
-    
+    //console.log(svo);
     check(svo,this.ValidationPattern);
 
     if ( svo.subject != "-") {
@@ -27,21 +27,18 @@ SVOLog = {
       _.extend(selector, {"verb":svo.verb});          
     }
 
-    /*
-      if ( this.request.body ) {
-        _.extend(selector, {"params": this.request.body});
-      }
-      */
-    var result = selector;
+    var result = {}; 
     result = {"_id": Events.insert(selector)};
     return result;
   },
   query : function(svo) {
+    //console.log(svo);
+    
     check(svo,this.ValidationPattern);
 
     var selector ={};
 
-    if ( p != "-") {
+    if ( svo.subject != "-") {
       _.extend(selector, {"subject":svo.subject});
     }
     if ( svo.object != "-") {
@@ -69,7 +66,9 @@ Router.route("/svo/:subject/:verb/:object",
     var result = {};
 
     try {
-      result = SVOLog.query(this.params);
+      var svoObj = {};
+      _.extend(svoObj, this.params);
+      result = SVOLog.query(svoObj);
       //result = selector;
       this.response.writeHead(200, {'Content-Type': 'application/json'});
       this.response.end(JSON.stringify(result));
@@ -86,18 +85,19 @@ Router.route("/svo/:subject/:verb/:object",
   .post(function () {
     // POST /webhooks/stripe
     var result = {};
+    var svoObj = {};
+    _.extend(svoObj, this.request.body);
+    _.extend(svoObj, this.params);
     try {
-      result = SVOLog.add(this.params);
+      result = SVOLog.add(svoObj);
       this.response.writeHead(200, {'Content-Type': 'application/json'});
       this.response.end(JSON.stringify(result));
     }
     catch (e) {
       this.response.writeHead(400, {'Content-Type': 'application/json'});
-      this.response.end(e);
-      
+      this.response.end(JSON.stringify(e));
     }
   })
   .put(function () {
     this.post();
   })
-

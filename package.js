@@ -12,7 +12,10 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3.1');
-  api.use('underscore');
+  api.use("meteor");
+  api.use("mongo-livedata");
+  api.use("check");
+  api.use("matb33:collection-hooks@0.7.6");
   api.use('iron:router@1.0.7');
   // Give users of this package access to the Templating package.
   api.imply('templating')
@@ -20,8 +23,8 @@ Package.onUse(function(api) {
   //api.export('SVOAPI', 'server');
   // Specify the source code for the package.
 
-  api.addFiles('appmill:svo-server.js',"server");
   api.addFiles('appmill:svo-both.js');
+  api.addFiles('appmill:svo-server.js',"server");
 });
 
 Package.onTest(function(api) {
